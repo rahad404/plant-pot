@@ -68,7 +68,6 @@ export default function PlantDetailPage({
   const [submittingReview, setSubmittingReview] = useState(false)
 
   // Buy now
-  const [buying, setBuying] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -128,17 +127,12 @@ export default function PlantDetailPage({
     setSubmittingReview(false)
   }
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!session?.user) {
       router.push(`/login?callbackUrl=/plants/${id}`)
       return
     }
-    setBuying(true)
-    // Dummy payment — just confirm and redirect
-    await new Promise((r) => setTimeout(r, 1200))
-    setBuying(false)
-    toast.success("Payment confirmed! Your plant is on its way.")
-    router.push("/dashboard")
+    router.push(`/checkout/${id}`)
   }
 
   const loadMoreReviews = async () => {
@@ -341,9 +335,9 @@ export default function PlantDetailPage({
 
             {/* Buy Now */}
             <div className="flex flex-col gap-3 pt-2">
-              <Button size="lg" className="w-full" onClick={handleBuyNow} disabled={buying}>
+              <Button size="lg" className="w-full" onClick={handleBuyNow}>
                 <ShoppingCart className="mr-2 size-5" />
-                {buying ? "Processing..." : "Buy Now — $" + plant.price.toFixed(2)}
+                Buy Now — ${plant.price.toFixed(2)}
               </Button>
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="size-4 text-green-500" />

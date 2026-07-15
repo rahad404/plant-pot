@@ -111,6 +111,14 @@ interface UsersResponse {
 }
 
 export const api = {
+  orders: {
+    create(data: { plantId: string; plantName: string; price: number }) {
+      return request<{ order: Order }>("/api/orders", {
+        method: "POST",
+        body: JSON.stringify(data),
+      })
+    },
+  },
   contact: {
     submit(data: { name: string; email: string; message: string }) {
       return request<{ success: boolean }>("/api/contact", {
