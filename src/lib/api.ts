@@ -125,6 +125,12 @@ export const api = {
         const qs = params ? "?" + new URLSearchParams(params).toString() : ""
         return request<OrdersResponse>(`/api/admin/orders${qs}`)
       },
+      update(id: string, data: { status: string }) {
+        return request<{ order: Order }>(`/api/admin/orders/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        })
+      },
     },
   },
   users: {
