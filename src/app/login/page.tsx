@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
@@ -43,7 +43,6 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (error) {
-      // Generic message on purpose — don't reveal whether the email exists.
       toast.error("Invalid email or password.");
       return;
     }
@@ -57,7 +56,6 @@ export default function LoginPage() {
       provider: "google",
       callbackURL: callbackUrl,
     });
-    // Browser redirects away; no need to reset loading state here.
   }
 
   return (
@@ -146,5 +144,13 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

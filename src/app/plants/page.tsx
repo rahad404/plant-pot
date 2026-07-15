@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X } from "lucide-react"
 
@@ -35,7 +35,7 @@ const SORT_OPTIONS = [
   { value: "name", label: "Name A–Z" },
 ]
 
-export default function PlantsPage() {
+function PlantsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -312,4 +312,12 @@ function generatePageNumbers(current: number, total: number): (number | "..." )[
   if (current < total - 2) pages.push("...")
   pages.push(total)
   return pages
+}
+
+export default function PlantsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading...</div>}>
+      <PlantsPageContent />
+    </Suspense>
+  )
 }

@@ -10,7 +10,7 @@ async function request<T>(
   })
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: "Request failed" }))
-    throw new Error(error.error || `HTTP ${res.status}`)
+    throw new Error(error.error || error.message || `HTTP ${res.status}`)
   }
   return res.json()
 }
@@ -117,12 +117,14 @@ export interface CareSchedule {
   plantName: string
   orderId: string
   lastWatered: string | null
+  nextWatering?: string | null
   createdAt: string
   light?: string
   watering?: string
   compost?: string
   medicine?: string
   image?: string
+  wateringFrequencyDays?: number
 }
 
 interface DashboardOrdersResponse {
@@ -143,7 +145,7 @@ export const api = {
     },
     markAsWatered(id: string) {
       return request<{ careSchedule: CareSchedule }>(
-        `/api/care-schedule/${id}/watered`,
+        `/api/dashboard/care-schedule/${id}/watered`,
         { method: "PATCH" }
       )
     },
