@@ -80,6 +80,14 @@ interface ReviewsResponse {
 }
 
 export const api = {
+  contact: {
+    submit(data: { name: string; email: string; message: string }) {
+      return request<{ success: boolean }>("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(data),
+      })
+    },
+  },
   plants: {
     list(params?: Record<string, string>) {
       const qs = params ? "?" + new URLSearchParams(params).toString() : ""
