@@ -110,7 +110,38 @@ interface UsersResponse {
   users: UserProfile[]
 }
 
+export interface CareSchedule {
+  _id: string
+  userId: string
+  plantId: string
+  plantName: string
+  orderId: string
+  lastWatered: string | null
+  createdAt: string
+  light?: string
+  watering?: string
+  compost?: string
+  medicine?: string
+  image?: string
+}
+
+interface DashboardOrdersResponse {
+  orders: Order[]
+}
+
+interface DashboardMyPlantsResponse {
+  plants: CareSchedule[]
+}
+
 export const api = {
+  dashboard: {
+    myPlants() {
+      return request<DashboardMyPlantsResponse>("/api/dashboard/my-plants")
+    },
+    orders() {
+      return request<DashboardOrdersResponse>("/api/dashboard/orders")
+    },
+  },
   orders: {
     create(data: { plantId: string; plantName: string; price: number }) {
       return request<{ order: Order }>("/api/orders", {
