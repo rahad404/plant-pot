@@ -79,6 +79,37 @@ interface ReviewsResponse {
   pagination: Pagination
 }
 
+export interface Order {
+  _id: string
+  userId: string
+  userName: string
+  userEmail: string
+  plantId: string
+  plantName: string
+  price: number
+  status: string
+  createdAt: string
+}
+
+interface OrdersResponse {
+  orders: Order[]
+  pagination: Pagination
+}
+
+export interface UserProfile {
+  _id: string
+  id?: string
+  name: string
+  email: string
+  image?: string
+  role?: string
+  createdAt?: string
+}
+
+interface UsersResponse {
+  users: UserProfile[]
+}
+
 export const api = {
   contact: {
     submit(data: { name: string; email: string; message: string }) {
@@ -86,6 +117,19 @@ export const api = {
         method: "POST",
         body: JSON.stringify(data),
       })
+    },
+  },
+  admin: {
+    orders: {
+      list(params?: Record<string, string>) {
+        const qs = params ? "?" + new URLSearchParams(params).toString() : ""
+        return request<OrdersResponse>(`/api/admin/orders${qs}`)
+      },
+    },
+  },
+  users: {
+    list() {
+      return request<UsersResponse>("/api/users")
     },
   },
   plants: {
