@@ -15,16 +15,14 @@ export const auth = betterAuth({
 
    emailAndPassword: {
       enabled: true,
-      requireEmailVerification: true,
-      minPasswordLength: 10,
+      requireEmailVerification: false,
+      minPasswordLength: 6,
       maxPasswordLength: 128,
-      // sendResetPassword: async ({ user, url }) => { await sendEmail({ to: user.email, url }) },
    },
 
    emailVerification: {
-      sendOnSignUp: true,
+      sendOnSignUp: false,
       autoSignInAfterVerification: true,
-      // sendVerificationEmail: async ({ user, url }) => { await sendEmail({ to: user.email, url }) },
    },
 
    socialProviders: {

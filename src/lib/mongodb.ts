@@ -24,4 +24,4 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export const mongoClient = client;
-export const db = client.db(); // uses the db name from the connection string
+export const db = client.db("plantshop");
