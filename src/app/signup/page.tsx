@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -20,53 +20,63 @@ import { Separator } from "@/components/ui/separator";
 
 import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    if (password.length < 10) {
+      toast.error("Password must be at least 10 characters.");
+      return;
+    }
+
     setIsLoading(true);
 
-    const { error } = await authClient.signIn.email({
+    const { error } = await authClient.signUp.email({
+      name,
       email,
       password,
-      callbackURL: callbackUrl,
+      callbackURL: "/dashboard",
     });
 
     setIsLoading(false);
 
     if (error) {
-      // Generic message on purpose — don't reveal whether the email exists.
-      toast.error("Invalid email or password.");
+      toast.error(error.message || "Could not create account.");
       return;
     }
 
-    router.push(callbackUrl);
+    toast.success("Check your email to verify your account.");
+    router.push("/login");
   }
 
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: callbackUrl,
+      callbackURL: "/dashboard",
     });
-    // Browser redirects away; no need to reset loading state here.
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Sign in to your account to continue
+            Get started — it only takes a minute
           </CardDescription>
         </CardHeader>
 
@@ -94,6 +104,18 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -107,19 +129,11 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 minLength={10}
                 value={password}
@@ -127,20 +141,33 @@ export default function LoginPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={10}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
         </CardContent>
 
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/signup"
+              href="/login"
               className="font-medium text-primary underline underline-offset-4"
             >
-              Sign up
+              Sign in
             </Link>
           </p>
         </CardFooter>
