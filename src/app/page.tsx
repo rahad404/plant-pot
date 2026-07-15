@@ -1,27 +1,15 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Search, Leaf, Droplets, Sun, Shield, Sprout, Star, ShoppingCart, ChevronRight, Sparkles, Truck, RefreshCw, HeadphonesIcon } from "lucide-react"
+import { ArrowRight, Search, Leaf, Droplets, Truck, RefreshCw, Star, ShoppingCart, ChevronRight, Sparkles, Sprout } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-
-const featuredPlants = [
-  { name: "Monstera Deliciosa", price: 34.99, rating: 4.8, image: "https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80", badge: "Bestseller" },
-  { name: "Snake Plant", price: 24.99, rating: 4.6, image: "https://images.unsplash.com/photo-1593482892290-f0a3e4f4e0b0?w=400&q=80", badge: "Easy Care" },
-  { name: "Fiddle Leaf Fig", price: 49.99, rating: 4.7, image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&q=80", badge: "Trending" },
-  { name: "Peace Lily", price: 29.99, rating: 4.5, image: "https://images.unsplash.com/photo-1593691509543-c55fb32e7355?w=400&q=80", badge: "Air Purifier" },
-]
-
-const categories = [
-  { name: "Indoor Plants", count: 48, image: "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80", slug: "indoor" },
-  { name: "Outdoor Plants", count: 36, image: "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=400&q=80", slug: "outdoor" },
-  { name: "Succulents", count: 28, image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&q=80", slug: "succulents" },
-  { name: "Flowering Plants", count: 32, image: "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400&q=80", slug: "flowering" },
-]
+import { Skeleton } from "@/components/ui/skeleton"
+import { api, type Plant, type Category } from "@/lib/api"
 
 const benefits = [
   { icon: Leaf, title: "Expertly Curated", description: "Every plant is hand-picked by our botanists for quality and health." },
@@ -42,7 +30,66 @@ const testimonials = [
   { name: "Emily Rodriguez", role: "Interior Designer", avatar: "ER", content: "I recommend PlantPot to all my clients. Their plants are gorgeous and their delivery is always on time.", rating: 5 },
 ]
 
+const FALLBACK_CATEGORIES = [
+  { name: "Indoor Plants", slug: "indoor", image: "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80" },
+  { name: "Outdoor Plants", slug: "outdoor", image: "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=400&q=80" },
+  { name: "Succulents", slug: "succulents", image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&q=80" },
+  { name: "Flowering Plants", slug: "flowering", image: "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400&q=80" },
+]
+
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80",
+  "https://images.unsplash.com/photo-1593482892290-f0a3e4f4e0b0?w=400&q=80",
+  "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&q=80",
+]
+
 export default function HomePage() {
+  const [featuredPlants, setFeaturedPlants] = useState<Plant[]>([])
+  const [categories, setCategories] = useState<(Category & { image?: string })[]>([])
+  const [loadingPlants, setLoadingPlants] = useState(true)
+  const [loadingCats, setLoadingCats] = useState(true)
+  const [searchInput, setSearchInput] = useState("")
+
+  useEffect(() => {
+    // Fetch featured plants
+    api.plants
+      .list({ limit: "4", sort: "rating_desc" })
+      .then((data) => setFeaturedPlants(data.plants || []))
+      .catch(() => setFeaturedPlants([]))
+      .finally(() => setLoadingPlants(false))
+
+    // Fetch categories
+    api.plants
+      .categories()
+      .then((data) => {
+        const cats = data.categories || []
+        if (cats.length === 0) {
+          setCategories(FALLBACK_CATEGORIES)
+        } else {
+          // Merge with fallback images by matching slug/name
+          setCategories(
+            cats.slice(0, 4).map((cat) => {
+              const fallback = FALLBACK_CATEGORIES.find(
+                (f) => f.slug === cat.slug || f.name.toLowerCase() === cat.name.toLowerCase()
+              )
+              return { ...cat, image: fallback?.image || FALLBACK_CATEGORIES[0].image }
+            })
+          )
+        }
+      })
+      .catch(() => setCategories(FALLBACK_CATEGORIES))
+      .finally(() => setLoadingCats(false))
+  }, [])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchInput.trim()) {
+      window.location.href = `/plants?search=${encodeURIComponent(searchInput.trim())}`
+    } else {
+      window.location.href = "/plants"
+    }
+  }
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -66,18 +113,20 @@ export default function HomePage() {
               <p className="max-w-lg text-lg text-muted-foreground">
                 Discover our curated collection of beautiful plants delivered to your door with expert care guides.
               </p>
-              <div className="flex max-w-md items-center gap-2 rounded-xl border bg-background p-1 shadow-sm">
-                <div className="flex items-center gap-2 pl-3">
-                  <Search className="size-4 text-muted-foreground" />
+              <form onSubmit={handleSearch} className="flex max-w-md items-center gap-2 rounded-xl border bg-background p-1 shadow-sm">
+                <div className="flex flex-1 items-center gap-2 pl-3">
+                  <Search className="size-4 shrink-0 text-muted-foreground" />
                   <Input
                     placeholder="Search plants..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     className="border-0 shadow-none focus-visible:ring-0"
                   />
                 </div>
-                <Button size="sm" className="shrink-0">
+                <Button size="sm" type="submit" className="shrink-0">
                   Search
                 </Button>
-              </div>
+              </form>
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link href="/plants">
                   <Button size="lg">
@@ -97,7 +146,7 @@ export default function HomePage() {
                 <div className="grid h-full grid-cols-2 gap-3">
                   <div className="overflow-hidden rounded-xl">
                     <img
-                      src="https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80"
+                      src={HERO_IMAGES[0]}
                       alt="Plant"
                       className="h-full w-full object-cover"
                     />
@@ -105,14 +154,14 @@ export default function HomePage() {
                   <div className="grid grid-rows-2 gap-3">
                     <div className="overflow-hidden rounded-xl">
                       <img
-                        src="https://images.unsplash.com/photo-1593482892290-f0a3e4f4e0b0?w=400&q=80"
+                        src={HERO_IMAGES[1]}
                         alt="Plant"
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div className="overflow-hidden rounded-xl">
                       <img
-                        src="https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&q=80"
+                        src={HERO_IMAGES[2]}
                         alt="Plant"
                         className="h-full w-full object-cover"
                       />
@@ -144,14 +193,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Plants */}
+      {/* Featured Plants — real data from API */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-10 flex items-end justify-between">
             <div>
               <Badge variant="secondary" className="mb-2">Collection</Badge>
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Featured Plants</h2>
-              <p className="mt-2 text-muted-foreground">Our most popular picks for your home</p>
+              <p className="mt-2 text-muted-foreground">Our top-rated picks for your home</p>
             </div>
             <Link href="/plants">
               <Button variant="ghost" className="hidden md:flex">
@@ -160,37 +209,69 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredPlants.map((plant) => (
-              <Card key={plant.name} className="group overflow-hidden">
-                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                  <img
-                    src={plant.image}
-                    alt={plant.name}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <Badge className="absolute left-3 top-3">{plant.badge}</Badge>
-                  <Button size="icon" variant="secondary" className="absolute right-3 top-3 size-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100">
-                    <ShoppingCart className="size-4" />
-                  </Button>
+            {loadingPlants
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="mb-2 h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </CardContent>
+                  </Card>
+                ))
+              : featuredPlants.length > 0
+              ? featuredPlants.map((plant) => (
+                  <Link key={plant._id} href={`/plants/${plant._id}`}>
+                    <Card className="group overflow-hidden transition-shadow hover:shadow-md">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                        <img
+                          src={plant.images?.[0] || plant.image || "https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80"}
+                          alt={plant.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        {plant.badge && (
+                          <Badge className="absolute left-3 top-3">{plant.badge}</Badge>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="absolute right-3 top-3 size-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <ShoppingCart className="size-4" />
+                        </Button>
+                      </div>
+                      <CardContent className="p-4">
+                        <CardTitle className="text-base">{plant.name}</CardTitle>
+                        {plant.rating !== undefined && plant.rating > 0 && (
+                          <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                            <Star className="size-3.5 fill-yellow-500 text-yellow-500" />
+                            <span>{plant.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                        <div className="mt-2 text-lg font-semibold">${plant.price.toFixed(2)}</div>
+                      </CardContent>
+                      <CardFooter className="p-4 pt-0">
+                        <Button className="w-full" size="sm">
+                          <ShoppingCart className="mr-2 size-4" />
+                          View Plant
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </Link>
+                ))
+              : (
+                <div className="col-span-4 py-12 text-center">
+                  <p className="text-muted-foreground">No plants yet — check back soon!</p>
+                  <Link href="/plants">
+                    <Button variant="outline" className="mt-3">Browse All Plants</Button>
+                  </Link>
                 </div>
-                <CardContent className="p-4">
-                  <CardTitle className="text-base">{plant.name}</CardTitle>
-                  <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                    <Star className="size-3.5 fill-yellow-500 text-yellow-500" />
-                    <span>{plant.rating}</span>
-                  </div>
-                  <div className="mt-2 text-lg font-semibold">${plant.price}</div>
-                </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Button className="w-full" size="sm">
-                    <ShoppingCart className="mr-2 size-4" />
-                    Add to Cart
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+              )}
           </div>
+
           <div className="mt-6 text-center md:hidden">
             <Link href="/plants">
               <Button variant="outline">
@@ -202,7 +283,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Categories — real data from API */}
       <section id="categories" className="bg-muted/30 py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-10 text-center">
@@ -211,23 +292,32 @@ export default function HomePage() {
             <p className="mt-2 text-muted-foreground">Find exactly what you're looking for</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map((cat) => (
-              <Link key={cat.name} href={`/plants?category=${cat.slug}`}>
-                <Card className="group overflow-hidden transition-colors hover:border-primary/50">
-                  <div className="aspect-[4/3] overflow-hidden bg-muted">
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <CardTitle className="text-base">{cat.name}</CardTitle>
-                    <CardDescription>{cat.count} plants</CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {loadingCats
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardContent>
+                  </Card>
+                ))
+              : categories.map((cat) => (
+                  <Link key={cat.slug} href={`/plants?category=${cat.slug}`}>
+                    <Card className="group overflow-hidden transition-colors hover:border-primary/50">
+                      <div className="aspect-[4/3] overflow-hidden bg-muted">
+                        <img
+                          src={cat.image || FALLBACK_CATEGORIES[0].image}
+                          alt={cat.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <CardTitle className="text-base capitalize">{cat.name}</CardTitle>
+                        <CardDescription>Browse collection</CardDescription>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
           </div>
         </div>
       </section>
@@ -262,13 +352,9 @@ export default function HomePage() {
           <div className="mb-10 flex items-end justify-between">
             <div>
               <Badge variant="secondary" className="mb-2">Plant Care</Badge>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Care Tips & Guides</h2>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Care Tips &amp; Guides</h2>
               <p className="mt-2 text-muted-foreground">Everything you need to keep your plants thriving</p>
             </div>
-            <Button variant="ghost" className="hidden md:flex">
-              View All Guides
-              <ArrowRight className="ml-1 size-4" />
-            </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {careTips.map((tip) => (
@@ -283,10 +369,6 @@ export default function HomePage() {
                 <CardContent className="p-5">
                   <CardTitle className="mb-2 text-lg">{tip.title}</CardTitle>
                   <CardDescription>{tip.excerpt}</CardDescription>
-                  <Button variant="link" className="mt-2 p-0">
-                    Read More
-                    <ArrowRight className="ml-1 size-3" />
-                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -332,7 +414,7 @@ export default function HomePage() {
       <section className="bg-primary/5 py-16 md:py-20">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <Badge variant="secondary" className="mb-2">Stay Connected</Badge>
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Get Plant Tips & Offers</h2>
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Get Plant Tips &amp; Offers</h2>
           <p className="mt-2 mb-6 text-muted-foreground">
             Subscribe to our newsletter for exclusive deals, new arrivals, and expert care advice.
           </p>

@@ -19,9 +19,9 @@ export default function EditPlantPage({
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
-  useEffect(() => {
+useEffect(() => {
     api.plants.get(id)
-      .then((data) => setPlant(data.plant))
+      .then((data) => setPlant(data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }, [id])

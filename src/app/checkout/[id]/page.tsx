@@ -42,8 +42,8 @@ export default function CheckoutPage({
     setName(session.user.name || "")
     setEmail(session.user.email || "")
 
-    api.plants.get(id)
-      .then((data) => setPlant(data.plant))
+api.plants.get(id)
+      .then((data) => setPlant(data))
       .catch(() => toast.error("Plant not found"))
       .finally(() => setLoading(false))
   }, [id, session, router])

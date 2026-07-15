@@ -69,10 +69,10 @@ export default function PlantDetailPage({
 
   // Buy now
 
-  useEffect(() => {
+useEffect(() => {
     setLoading(true)
     api.plants.get(id)
-      .then((data) => setPlant(data.plant))
+      .then((data) => setPlant(data))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])

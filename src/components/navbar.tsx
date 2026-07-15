@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Menu, X, Leaf, LogOut, User, ShoppingBag } from "lucide-react"
+import { Menu, X, Leaf, LogOut, User, ShoppingBag, LayoutDashboard } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -33,12 +33,22 @@ export function Navbar() {
   const user = session?.user
   const role = user?.role as string | undefined
 
-  const dashboardHref = role === "admin" ? "/admin" : "/dashboard"
+  const isAdmin = role === "admin"
 
   const handleLogout = async () => {
-    await authClient.signOut()
+    try {
+      // Call the better-auth signout endpoint directly to ensure cookie is cleared
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/sign-out`, {
+        method: "POST",
+        credentials: "include",
+      })
+      await authClient.signOut()
+    } catch {
+      // Ignore errors
+    }
     toast.success("Logged out")
     router.push("/")
+    router.refresh()
   }
 
   return (
@@ -65,6 +75,26 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          {user && (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
+              >
+                <LayoutDashboard className="size-4" />
+                <span>Dashboard</span>
+              </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
+                >
+                  <ShoppingBag className="size-4" />
+                  <span>Admin</span>
+                </Link>
+              )}
+            </>
+          )}
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -80,17 +110,25 @@ export function Navbar() {
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={dashboardHref} className="flex cursor-pointer items-center gap-2">
-                    <ShoppingBag className="size-4" />
-                    <span>Dashboard</span>
+                  <Link href="/dashboard" className="flex cursor-pointer items-center gap-2">
+                    <LayoutDashboard className="size-4" />
+                    <span>User Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin" className="flex cursor-pointer items-center gap-2">
+                      <ShoppingBag className="size-4" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex cursor-pointer items-center gap-2">
+                  <Link href="/dashboard/profile" className="flex cursor-pointer items-center gap-2">
                     <User className="size-4" />
                     <span>Profile</span>
                   </Link>
@@ -110,7 +148,7 @@ export function Navbar() {
               <Link href="/login">
                 <Button variant="ghost">Log in</Button>
               </Link>
-              <Link href="/register">
+              <Link href="/signup">
                 <Button>Sign up</Button>
               </Link>
             </>
@@ -152,10 +190,24 @@ export function Navbar() {
                   <span className="text-xs text-muted-foreground">{user.email}</span>
                 </div>
               </div>
-              <Link href={dashboardHref} onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                 <Button variant="outline" className="w-full justify-start gap-2">
-                  <ShoppingBag className="size-4" />
+                  <LayoutDashboard className="size-4" />
                   Dashboard
+                </Button>
+              </Link>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" className="w-full justify-start gap-2">
+                    <ShoppingBag className="size-4" />
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
+              <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full justify-start gap-2">
+                  <User className="size-4" />
+                  Profile
                 </Button>
               </Link>
               <Button
@@ -172,7 +224,7 @@ export function Navbar() {
               <Link href="/login" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" className="w-full">Log in</Button>
               </Link>
-              <Link href="/register" onClick={() => setIsOpen(false)}>
+              <Link href="/signup" onClick={() => setIsOpen(false)}>
                 <Button className="w-full">Sign up</Button>
               </Link>
             </div>
