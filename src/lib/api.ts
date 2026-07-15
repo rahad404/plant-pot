@@ -187,6 +187,12 @@ export const api = {
         method: "PATCH",
       })
     },
+    update(id: string, data: { name?: string; image?: string }) {
+      return request<{ user: UserProfile }>(`/api/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      })
+    },
   },
   plants: {
     list(params?: Record<string, string>) {
