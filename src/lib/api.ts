@@ -141,6 +141,12 @@ export const api = {
     orders() {
       return request<DashboardOrdersResponse>("/api/dashboard/orders")
     },
+    markAsWatered(id: string) {
+      return request<{ careSchedule: CareSchedule }>(
+        `/api/care-schedule/${id}/watered`,
+        { method: "PATCH" }
+      )
+    },
   },
   orders: {
     create(data: { plantId: string; plantName: string; price: number }) {
