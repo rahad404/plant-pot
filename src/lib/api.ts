@@ -140,6 +140,23 @@ export const api = {
     get(id: string) {
       return request<PlantResponse>(`/api/plants/${id}`)
     },
+    create(data: Partial<Plant>) {
+      return request<PlantResponse>("/api/plants", {
+        method: "POST",
+        body: JSON.stringify(data),
+      })
+    },
+    update(id: string, data: Partial<Plant>) {
+      return request<PlantResponse>(`/api/plants/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      })
+    },
+    delete(id: string) {
+      return request<{ success: boolean }>(`/api/plants/${id}`, {
+        method: "DELETE",
+      })
+    },
     categories() {
       return request<CategoriesResponse>("/api/plants/categories")
     },
