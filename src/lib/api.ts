@@ -137,6 +137,11 @@ export const api = {
     list() {
       return request<UsersResponse>("/api/users")
     },
+    promoteToAdmin(id: string) {
+      return request<{ user: UserProfile }>(`/api/users/admin/${id}`, {
+        method: "PATCH",
+      })
+    },
   },
   plants: {
     list(params?: Record<string, string>) {
