@@ -25,30 +25,7 @@ import {
 } from "@/components/ui/sheet"
 import { PlantCard, PlantCardSkeleton } from "@/components/plant-card"
 import { PlantFilters } from "@/components/plant-filters"
-
-interface Plant {
-  _id: string
-  name: string
-  slug?: string
-  price: number
-  images?: string[]
-  image?: string
-  rating?: number
-  reviewsCount?: number
-  category?: string
-  light?: string
-  inStock?: boolean
-  badge?: string
-}
-
-interface Pagination {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPrevPage: boolean
-}
+import { api, type Plant, type Pagination } from "@/lib/api"
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
@@ -74,8 +51,7 @@ export default function PlantsPage() {
   const currentPage = parseInt(searchParams.get("page") || "1")
 
   useEffect(() => {
-    fetch("/api/plants/categories")
-      .then((r) => r.json())
+    api.plants.categories()
       .then((data) => setCategories(data.categories || []))
       .catch(() => {})
   }, [])
@@ -85,8 +61,7 @@ export default function PlantsPage() {
     const params = new URLSearchParams(searchParams.toString())
     if (!params.has("limit")) params.set("limit", "12")
 
-    fetch(`/api/plants?${params.toString()}`)
-      .then((r) => r.json())
+    api.plants.list(Object.fromEntries(params))
       .then((data) => {
         setPlants(data.plants || [])
         setPagination(data.pagination || null)
