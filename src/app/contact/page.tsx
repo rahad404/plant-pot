@@ -126,17 +126,6 @@ export default function ContactPage() {
                   ))}
                 </div>
               </div>
-
-              {/* Map placeholder */}
-              <div className="overflow-hidden rounded-xl border bg-muted">
-                <div className="flex aspect-[16/9] items-center justify-center bg-muted/50">
-                  <div className="text-center">
-                    <MapPin className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground/70">Map integration</p>
-                    <p className="text-xs text-muted-foreground/50">123 Green Street, Brooklyn, NY</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right — Form */}

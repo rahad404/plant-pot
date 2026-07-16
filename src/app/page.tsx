@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { api, type Plant, type Category } from "@/lib/api"
 
 const benefits = [
@@ -19,9 +20,9 @@ const benefits = [
 ]
 
 const careTips = [
-  { title: "Watering 101", excerpt: "Learn how often to water different types of plants based on season and light.", image: "https://images.unsplash.com/photo-1551818250-e1da1098a6e7?w=400&q=80" },
-  { title: "Light Requirements", excerpt: "Understanding low, medium, and bright light needs for your indoor garden.", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=80" },
-  { title: "Soil & Fertilizer", excerpt: "The right soil mix and fertilizer schedule makes all the difference.", image: "https://images.unsplash.com/photo-1559598467-f8b76c8155d0?w=400&q=80" },
+  { title: "Watering 101", excerpt: "Learn how often to water different types of plants based on season and light.", image: "https://i.ibb.co.com/bMMy028C/How-to-Water-Cactus-Feature.jpg" },
+  { title: "Light Requirements", excerpt: "Understanding low, medium, and bright light needs for your indoor garden.", image: "https://i.ibb.co.com/yFzQyX4V/images-2.jpg" },
+  { title: "Soil & Fertilizer", excerpt: "The right soil mix and fertilizer schedule makes all the difference.", image: "https://i.ibb.co.com/QFFhfNpx/images.jpg" },
 ]
 
 const testimonials = [
@@ -31,16 +32,18 @@ const testimonials = [
 ]
 
 const FALLBACK_CATEGORIES = [
-  { name: "Indoor Plants", slug: "indoor", image: "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80" },
-  { name: "Outdoor Plants", slug: "outdoor", image: "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?w=400&q=80" },
-  { name: "Succulents", slug: "succulents", image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&q=80" },
-  { name: "Flowering Plants", slug: "flowering", image: "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400&q=80" },
+  { name: "Indoor Plants", slug: "indoor", image: "https://i.ibb.co.com/1fs850Wb/420b24102b2eff4d93e901a61dabeca5.jpg" },
+  { name: "Outdoor Plants", slug: "outdoor", image: "https://i.ibb.co.com/bMMy028C/How-to-Water-Cactus-Feature.jpg" },
+  { name: "Succulents", slug: "succulents", image: "https://i.ibb.co.com/yFzQyX4V/images-2.jpg" },
+  { name: "Flowering Plants", slug: "flowering", image: "https://i.ibb.co.com/QFFhfNpx/images.jpg" },
 ]
 
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80",
-  "https://images.unsplash.com/photo-1593482892290-f0a3e4f4e0b0?w=400&q=80",
-  "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&q=80",
+  "https://i.ibb.co.com/1fs850Wb/420b24102b2eff4d93e901a61dabeca5.jpg",
+  "https://i.ibb.co.com/wZrhLzMC/images-3.jpg",
+  "https://i.ibb.co.com/yFzQyX4V/images-2.jpg",
+  "https://i.ibb.co.com/QFFhfNpx/images.jpg",
+  "https://i.ibb.co.com/bMMy028C/How-to-Water-Cactus-Feature.jpg",
 ]
 
 export default function HomePage() {
@@ -142,33 +145,23 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative hidden md:block">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/20 p-2">
-                <div className="grid h-full grid-cols-2 gap-3">
-                  <div className="overflow-hidden rounded-xl">
-                    <img
-                      src={HERO_IMAGES[0]}
-                      alt="Plant"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="grid grid-rows-2 gap-3">
-                    <div className="overflow-hidden rounded-xl">
-                      <img
-                        src={HERO_IMAGES[1]}
-                        alt="Plant"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="overflow-hidden rounded-xl">
-                      <img
-                        src={HERO_IMAGES[2]}
-                        alt="Plant"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Carousel className="w-full max-w-lg">
+                <CarouselContent>
+                  {HERO_IMAGES.map((src, i) => (
+                    <CarouselItem key={i}>
+                      <div className="aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/20 p-2">
+                        <img
+                          src={src}
+                          alt={`Plant ${i + 1}`}
+                          className="h-full w-full rounded-xl object-cover"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2 size-8" />
+                <CarouselNext className="right-2 size-8" />
+              </Carousel>
             </div>
           </div>
         </div>
@@ -227,7 +220,7 @@ export default function HomePage() {
                     <Card className="group overflow-hidden transition-shadow hover:shadow-md">
                       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                         <img
-                          src={plant.images?.[0] || plant.image || "https://images.unsplash.com/photo-1614594978525-4519a8277ca1?w=400&q=80"}
+                          src={plant.images?.[0] || plant.image || "https://i.ibb.co.com/wZrhLzMC/images-3.jpg"}
                           alt={plant.name}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />

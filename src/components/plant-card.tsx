@@ -24,22 +24,23 @@ export function PlantCard({ plant }: { plant: Plant }) {
   const imageUrl = plant.images?.[0] || plant.image || "/placeholder.svg"
 
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden border-border/50 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
       <Link href={`/plants/${plant._id}`}>
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
             src={imageUrl}
             alt={plant.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           {plant.badge && (
-            <Badge className="absolute left-3 top-3">{plant.badge}</Badge>
+            <Badge className="absolute left-3 top-3 shadow-sm">{plant.badge}</Badge>
           )}
           <Button
             size="icon"
             variant="secondary"
-            className="absolute right-3 top-3 size-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+            className="absolute right-3 top-3 size-8 rounded-full opacity-0 shadow-md transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1"
           >
             <ShoppingCart className="size-4" />
           </Button>
@@ -47,7 +48,7 @@ export function PlantCard({ plant }: { plant: Plant }) {
       </Link>
       <CardContent className="p-4">
         <Link href={`/plants/${plant._id}`}>
-          <h3 className="text-base font-semibold transition-colors hover:text-primary">
+          <h3 className="text-base font-semibold transition-colors duration-200 group-hover:text-primary">
             {plant.name}
           </h3>
         </Link>
@@ -63,10 +64,10 @@ export function PlantCard({ plant }: { plant: Plant }) {
             {plant.light} light
           </div>
         )}
-        <div className="mt-2 text-lg font-semibold">${plant.price.toFixed(2)}</div>
+        <div className="mt-2 text-lg font-semibold text-primary">${plant.price.toFixed(2)}</div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full" size="sm" disabled={plant.inStock === false}>
+        <Button className="w-full transition-all duration-200 hover:shadow-md hover:shadow-primary/20" size="sm" disabled={plant.inStock === false}>
           <ShoppingCart className="mr-2 size-4" />
           {plant.inStock === false ? "Out of Stock" : "Add to Cart"}
         </Button>

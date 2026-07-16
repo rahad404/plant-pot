@@ -110,7 +110,7 @@ export default function AboutPage() {
             </div>
             <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/20">
               <img
-                src="https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=600&q=80"
+                src="https://ibb.co.com/ccbDHynx"
                 alt="Our greenhouse"
                 className="h-full w-full object-cover"
               />

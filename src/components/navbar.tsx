@@ -83,7 +83,6 @@ export function Navbar() {
                 href="/dashboard"
                 className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
               >
-                <LayoutDashboard className="size-4" />
                 <span>Dashboard</span>
               </Link>
               {isAdmin && (
@@ -91,7 +90,6 @@ export function Navbar() {
                   href="/admin"
                   className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1.5"
                 >
-                  <ShoppingBag className="size-4" />
                   <span>Admin</span>
                 </Link>
               )}
