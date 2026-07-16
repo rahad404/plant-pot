@@ -24,4 +24,4 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export const mongoClient = client;
-export const db = client.db("plantshop");
+export const db = client.db(process.env.DB_NAME || "plantShopDB");

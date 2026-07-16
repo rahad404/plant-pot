@@ -302,7 +302,7 @@ export default function HomePage() {
                   </Card>
                 ))
               : categories.map((cat) => (
-                  <Link key={cat.slug} href={`/plants?category=${cat.slug}`}>
+                  <Link key={cat.slug} href={`/plants?category=${encodeURIComponent(cat.name)}`}>
                     <Card className="group overflow-hidden transition-colors hover:border-primary/50">
                       <div className="aspect-[4/3] overflow-hidden bg-muted">
                         <img

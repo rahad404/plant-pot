@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { authClient } from "@/lib/auth-client"
+import { clearServerToken } from "@/lib/api"
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -46,6 +47,7 @@ export function Navbar() {
     } catch {
       // Ignore errors
     }
+    clearServerToken()
     toast.success("Logged out")
     router.push("/")
     router.refresh()

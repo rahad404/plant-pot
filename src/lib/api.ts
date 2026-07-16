@@ -2,6 +2,9 @@ import { authClient } from "@/lib/auth-client"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
 
+// Server-compatible JWT (signed with ACCESS_TOKEN_SECRET)
+let serverToken: string | null = null
+
 /** Public request — no auth token attached */
 async function request<T>(
   endpoint: string,
@@ -19,21 +22,47 @@ async function request<T>(
 }
 
 /**
- * Authenticated request — automatically fetches the JWT from better-auth
- * and attaches it as an Authorization: Bearer header.
+ * Fetch a server-compatible JWT by sending the user's email to
+ * the server's /api/auth/jwt endpoint. The server signs it with
+ * ACCESS_TOKEN_SECRET which the verifyToken middleware expects.
+ */
+async function ensureServerToken(): Promise<string | undefined> {
+  if (serverToken) return serverToken
+  try {
+    const { data: session } = await authClient.getSession()
+    const email = session?.user?.email
+    if (!email) return undefined
+    const name = session?.user?.name || ""
+    const uid = (session?.user as Record<string, unknown>)?.id as string || email
+
+    const res = await fetch(`${BASE_URL}/api/auth/jwt`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name, uid }),
+    })
+    if (!res.ok) return undefined
+    const data = await res.json()
+    serverToken = data.token || null
+    return serverToken || undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Clear the cached server token (e.g. on logout) */
+export function clearServerToken() {
+  serverToken = null
+}
+
+/**
+ * Authenticated request — fetches a server-compatible JWT and
+ * attaches it as an Authorization: Bearer header.
  */
 async function authRequest<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  // better-auth jwt plugin exposes a token() method that returns the current JWT
-  let token: string | undefined
-  try {
-    const result = await authClient.token()
-    token = result?.data?.token ?? undefined
-  } catch {
-    // not authenticated — let the backend return 401
-  }
+  const token = await ensureServerToken()
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -208,7 +237,7 @@ export const api = {
       return authRequest<DashboardOrdersResponse>("/api/dashboard/orders")
     },
     markAsWatered(id: string) {
-      return authRequest<{ careSchedule: CareSchedule }>(
+      return authRequest<{ success: boolean; message: string; nextWatering: string }>(
         `/api/dashboard/care-schedule/${id}/watered`,
         { method: "PATCH" }
       )
@@ -256,7 +285,7 @@ export const api = {
         return raw
       },
       update(id: string, data: { status: string }) {
-        return authRequest<{ order: Order }>(`/api/admin/orders/${id}`, {
+        return authRequest<{ success: boolean; message: string }>(`/api/admin/orders/${id}`, {
           method: "PATCH",
           body: JSON.stringify(data),
         })
@@ -269,12 +298,12 @@ export const api = {
       return authRequest<UsersResponse>("/api/users")
     },
     promoteToAdmin(id: string) {
-      return authRequest<{ user: UserProfile }>(`/api/users/admin/${id}`, {
+      return authRequest<{ success: boolean; message: string }>(`/api/users/admin/${id}`, {
         method: "PATCH",
       })
     },
     update(id: string, data: { name?: string; image?: string }) {
-      return authRequest<{ user: UserProfile }>(`/api/users/${id}`, {
+      return authRequest<{ success: boolean; message: string }>(`/api/users/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
       })
@@ -283,7 +312,23 @@ export const api = {
 
   plants: {
     async list(params?: Record<string, string>) {
-      const qs = params ? "?" + new URLSearchParams(params).toString() : ""
+      // Map frontend sort values to server sort values
+      const SORT_MAP: Record<string, string> = {
+        "price-asc": "price_asc",
+        "price-desc": "price_desc",
+        "rating": "rating_desc",
+      }
+      const mappedParams = { ...params }
+      if (mappedParams.sort) {
+        const serverSort = SORT_MAP[mappedParams.sort]
+        if (serverSort) {
+          mappedParams.sort = serverSort
+        } else {
+          // "newest" and "name" — server defaults to createdAt desc
+          delete mappedParams.sort
+        }
+      }
+      const qs = mappedParams && Object.keys(mappedParams).length ? "?" + new URLSearchParams(mappedParams).toString() : ""
       const raw = await request<PlantsResponse>(`/api/plants${qs}`)
       const limit = Number(params?.limit ?? 12)
       return normalisePlantsResponse(raw, limit)

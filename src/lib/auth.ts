@@ -8,10 +8,14 @@ export const auth = betterAuth({
    baseURL: process.env.BETTER_AUTH_URL,
    secret: process.env.BETTER_AUTH_SECRET,
 
-   database: mongodbAdapter(db, { client: mongoClient }),
+   database: mongodbAdapter(db, { client: mongoClient, usePlural: true }),
 
    // Only these origins are allowed to complete auth flows / redirects.
    trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL as string],
+
+   user: {
+      modelName: "users",
+   },
 
    emailAndPassword: {
       enabled: true,
@@ -33,6 +37,7 @@ export const auth = betterAuth({
    },
 
    session: {
+      modelName: "sessions",
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24,
       cookieCache: { enabled: true, maxAge: 60 * 5 },

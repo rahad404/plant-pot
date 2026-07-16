@@ -185,7 +185,6 @@ export function PlantForm({ plant, loading }: PlantFormProps) {
         compost,
         medicine,
         images: finalImageUrl ? [finalImageUrl] : [],
-        image: finalImageUrl,
         badge,
         inStock: inStock === "true",
         stock: Number(stock),

@@ -93,7 +93,7 @@ export function PlantFilters({ categories }: PlantFiltersProps) {
           <SelectContent>
             <SelectItem value="">All Categories</SelectItem>
             {categories?.map((cat) => (
-              <SelectItem key={cat.slug} value={cat.slug}>
+              <SelectItem key={cat.slug} value={cat.name}>
                 {cat.name}
               </SelectItem>
             ))}

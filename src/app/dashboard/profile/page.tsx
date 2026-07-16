@@ -33,11 +33,12 @@ export default function ProfilePage() {
   }, [user])
 
   const handleSave = async () => {
-    if (!user?.id) return
+    const userId = (user as Record<string, unknown>)?._id as string | undefined
+    if (!userId) return
     setSaving(true)
     setMessage(null)
     try {
-      await api.users.update(user.id, { name, image: image || undefined })
+      await api.users.update(userId, { name, image: image || undefined })
       try {
         await refetchSession()
       } catch {

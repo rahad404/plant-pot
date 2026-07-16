@@ -257,7 +257,7 @@ useEffect(() => {
                 {plant.name}
               </h1>
               {plant.category && (
-                <Link href={`/plants?category=${plant.category}`}>
+                <Link href={`/plants?category=${encodeURIComponent(plant.category)}`}>
                   <Badge variant="secondary" className="mt-2 cursor-pointer capitalize">
                     {plant.category}
                   </Badge>
