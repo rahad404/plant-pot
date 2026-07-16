@@ -24,6 +24,9 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const absoluteCallbackUrl = callbackUrl.startsWith("http")
+    ? callbackUrl
+    : `${process.env.NEXT_PUBLIC_APP_URL || ""}${callbackUrl}`;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +40,7 @@ function LoginForm() {
     const { error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: callbackUrl,
+      callbackURL: absoluteCallbackUrl,
     });
 
     setIsLoading(false);
@@ -54,7 +57,7 @@ function LoginForm() {
     setIsGoogleLoading(true);
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: callbackUrl,
+      callbackURL: absoluteCallbackUrl,
     });
   }
 

@@ -5,17 +5,13 @@ import { mongoClient, db } from "@/lib/mongodb";
 import { ac, roles } from "@/lib/permissions";
 
 export const auth = betterAuth({
-   baseURL: process.env.BETTER_AUTH_URL,
+   baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
    secret: process.env.BETTER_AUTH_SECRET,
 
    database: mongodbAdapter(db, { client: mongoClient, usePlural: true }),
 
    // Only these origins are allowed to complete auth flows / redirects.
-   trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL as string],
-
-   user: {
-      modelName: "users",
-   },
+   trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL as string].filter(Boolean),
 
    emailAndPassword: {
       enabled: true,
@@ -37,7 +33,6 @@ export const auth = betterAuth({
    },
 
    session: {
-      modelName: "sessions",
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24,
       cookieCache: { enabled: true, maxAge: 60 * 5 },
@@ -50,7 +45,7 @@ export const auth = betterAuth({
    rateLimit: {
       enabled: true,
       window: 60,
-      max: 20,
+      max: 100,
    },
 
    plugins: [

@@ -39,7 +39,7 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       // Call the better-auth signout endpoint directly to ensure cookie is cleared
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/sign-out`, {
+      await fetch("/api/auth/sign-out", {
         method: "POST",
         credentials: "include",
       })

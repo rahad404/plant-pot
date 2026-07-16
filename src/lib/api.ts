@@ -4,6 +4,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
 
 // Server-compatible JWT (signed with ACCESS_TOKEN_SECRET)
 let serverToken: string | null = null
+let tokenFetchPromise: Promise<string | undefined> | null = null
 
 /** Public request — no auth token attached */
 async function request<T>(
@@ -26,8 +27,7 @@ async function request<T>(
  * the server's /api/auth/jwt endpoint. The server signs it with
  * ACCESS_TOKEN_SECRET which the verifyToken middleware expects.
  */
-async function ensureServerToken(): Promise<string | undefined> {
-  if (serverToken) return serverToken
+async function fetchServerToken(): Promise<string | undefined> {
   try {
     const { data: session } = await authClient.getSession()
     const email = session?.user?.email
@@ -42,16 +42,29 @@ async function ensureServerToken(): Promise<string | undefined> {
     })
     if (!res.ok) return undefined
     const data = await res.json()
-    serverToken = data.token || null
-    return serverToken || undefined
+    return data.token || undefined
   } catch {
     return undefined
   }
 }
 
+async function ensureServerToken(): Promise<string | undefined> {
+  if (serverToken) return serverToken
+  // Deduplicate concurrent token requests
+  if (!tokenFetchPromise) {
+    tokenFetchPromise = fetchServerToken().then((token) => {
+      serverToken = token || null
+      tokenFetchPromise = null
+      return token
+    })
+  }
+  return tokenFetchPromise
+}
+
 /** Clear the cached server token (e.g. on logout) */
 export function clearServerToken() {
   serverToken = null
+  tokenFetchPromise = null
 }
 
 /**

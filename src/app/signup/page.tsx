@@ -48,7 +48,7 @@ export default function SignupPage() {
       name,
       email,
       password,
-      callbackURL: "/dashboard",
+      callbackURL: `${process.env.NEXT_PUBLIC_APP_URL || ""}/dashboard`,
     });
 
     setIsLoading(false);
@@ -66,7 +66,7 @@ export default function SignupPage() {
     setIsGoogleLoading(true);
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: `${process.env.NEXT_PUBLIC_APP_URL || ""}/dashboard`,
     });
   }
 
