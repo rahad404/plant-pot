@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Star, ShoppingCart } from "lucide-react"
+import { Star, Eye } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +42,7 @@ export function PlantCard({ plant }: { plant: Plant }) {
             variant="secondary"
             className="absolute right-3 top-3 size-8 rounded-full opacity-0 shadow-md transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1"
           >
-            <ShoppingCart className="size-4" />
+            <Eye className="size-4" />
           </Button>
         </div>
       </Link>
@@ -67,10 +67,12 @@ export function PlantCard({ plant }: { plant: Plant }) {
         <div className="mt-2 text-lg font-semibold text-primary">${plant.price.toFixed(2)}</div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full transition-all duration-200 hover:shadow-md hover:shadow-primary/20" size="sm" disabled={plant.inStock === false}>
-          <ShoppingCart className="mr-2 size-4" />
-          {plant.inStock === false ? "Out of Stock" : "Add to Cart"}
-        </Button>
+        <Link href={`/plants/${plant._id}`} className="w-full">
+          <Button className="w-full transition-all duration-200 hover:shadow-md hover:shadow-primary/20" size="sm" disabled={plant.inStock === false}>
+            <Eye className="mr-2 size-4" />
+            {plant.inStock === false ? "Out of Stock" : "View Details"}
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   )
