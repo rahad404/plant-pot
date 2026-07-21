@@ -20,9 +20,9 @@ const benefits = [
 ]
 
 const careTips = [
-  { title: "Watering 101", excerpt: "Learn how often to water different types of plants based on season and light.", image: "https://i.ibb.co.com/bMMy028C/How-to-Water-Cactus-Feature.jpg" },
+  { title: "Watering 101", excerpt: "Learn how often to water different types of plants based on season and light.", image: "https://i.ibb.co.com/zTsw4Gb9/water-plant.webp" },
   { title: "Light Requirements", excerpt: "Understanding low, medium, and bright light needs for your indoor garden.", image: "https://i.ibb.co.com/yFzQyX4V/images-2.jpg" },
-  { title: "Soil & Fertilizer", excerpt: "The right soil mix and fertilizer schedule makes all the difference.", image: "https://i.ibb.co.com/QFFhfNpx/images.jpg" },
+  { title: "Soil & Fertilizer", excerpt: "The right soil mix and fertilizer schedule makes all the difference.", image: "https://i.ibb.co.com/LXtfJXh7/fartilizer.jpg" },
 ]
 
 const testimonials = [
@@ -33,8 +33,8 @@ const testimonials = [
 
 const FALLBACK_CATEGORIES = [
   { name: "Indoor Plants", slug: "indoor", image: "https://i.ibb.co.com/1fs850Wb/420b24102b2eff4d93e901a61dabeca5.jpg" },
-  { name: "Outdoor Plants", slug: "outdoor", image: "https://i.ibb.co.com/bMMy028C/How-to-Water-Cactus-Feature.jpg" },
-  { name: "Succulents", slug: "succulents", image: "https://i.ibb.co.com/yFzQyX4V/images-2.jpg" },
+  { name: "Outdoor Plants", slug: "outdoor", image: "https://i.ibb.co.com/VczPwbpc/outdore-plants.avif" },
+  { name: "Succulents", slug: "succulents", image: "https://i.ibb.co.com/Q3TJLwpN/saculants.jpg" },
   { name: "Flowering Plants", slug: "flowering", image: "https://i.ibb.co.com/QFFhfNpx/images.jpg" },
 ]
 
