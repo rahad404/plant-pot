@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { Camera, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { Camera, CheckCircle2, AlertCircle, Loader2, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { authClient } from "@/lib/auth-client"
 import { api } from "@/lib/api"
+import { uploadImageToImgBB, validateImageFile } from "@/lib/image-upload"
 
 export default function ProfilePage() {
   const { data: session, isPending, refetch: refetchSession } = authClient.useSession()
@@ -20,10 +21,12 @@ export default function ProfilePage() {
   const [name, setName] = useState("")
   const [image, setImage] = useState("")
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<{
     type: "success" | "error"
     text: string
   } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (user) {
@@ -32,8 +35,32 @@ export default function ProfilePage() {
     }
   }, [user])
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      setMessage({ type: "error", text: validation.error || "Invalid file" })
+      return
+    }
+
+    setUploading(true)
+    setMessage(null)
+    try {
+      const url = await uploadImageToImgBB(file)
+      setImage(url)
+      setMessage({ type: "success", text: "Image uploaded successfully. Save changes to apply." })
+    } catch {
+      setMessage({ type: "error", text: "Failed to upload image. Try again." })
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
+
   const handleSave = async () => {
-    const userId = (user as Record<string, unknown>)?._id as string | undefined
+    const userId = (user as Record<string, unknown>)?.id as string | undefined
     if (!userId) return
     setSaving(true)
     setMessage(null)
@@ -100,9 +127,18 @@ export default function ProfilePage() {
                   {initials}
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 rounded-full border-4 border-background bg-primary p-1.5 text-primary-foreground shadow-sm">
-                <Camera className="size-3" />
-              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-1 -right-1 cursor-pointer rounded-full border-4 border-background bg-primary p-1.5 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Camera className="size-3" />
+                )}
+              </button>
             </div>
             <div className="text-center">
               <p className="font-medium">{user.name}</p>
@@ -147,29 +183,45 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">Profile Image URL</Label>
-              <Input
-                id="image"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-              />
-              {image && (
-                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="relative size-8 overflow-hidden rounded-full border">
-                    <Image
-                      src={image}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none"
-                      }}
-                    />
+              <Label>Profile Image</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                  ) : (
+                    <Upload className="mr-2 size-4" />
+                  )}
+                  {uploading ? "Uploading..." : "Upload Image"}
+                </Button>
+                {image && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="relative size-8 overflow-hidden rounded-full border">
+                      <Image
+                        src={image}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    Image ready
                   </div>
-                  Preview
-                </div>
-              )}
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG, WebP, or GIF. Max 5MB.
+              </p>
             </div>
 
             {message && (
@@ -190,7 +242,7 @@ export default function ProfilePage() {
             )}
 
             <div className="flex gap-3">
-              <Button onClick={handleSave} disabled={saving || !name.trim()}>
+              <Button onClick={handleSave} disabled={saving || uploading || !name.trim()}>
                 {saving && <Loader2 className="mr-1 size-4 animate-spin" />}
                 Save Changes
               </Button>
@@ -201,7 +253,7 @@ export default function ProfilePage() {
                   setImage(user.image || "")
                   setMessage(null)
                 }}
-                disabled={saving}
+                disabled={saving || uploading}
               >
                 Reset
               </Button>
