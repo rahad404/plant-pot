@@ -20,6 +20,7 @@ export default function ProfilePage() {
 
   const [name, setName] = useState("")
   const [image, setImage] = useState("")
+  const [userId, setUserId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<{
@@ -32,6 +33,11 @@ export default function ProfilePage() {
     if (user) {
       setName(user.name || "")
       setImage(user.image || "")
+      api.users.getByEmail(user.email!).then((data) => {
+        setUserId(data._id)
+      }).catch(() => {
+        // fallback
+      })
     }
   }, [user])
 
@@ -60,7 +66,6 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
-    const userId = (user as Record<string, unknown>)?.id as string | undefined
     if (!userId) return
     setSaving(true)
     setMessage(null)

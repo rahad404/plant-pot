@@ -321,6 +321,9 @@ export const api = {
         body: JSON.stringify(data),
       })
     },
+    getByEmail(email: string) {
+      return authRequest<UserProfile>(`/api/users/${encodeURIComponent(email)}`)
+    },
   },
 
   plants: {
